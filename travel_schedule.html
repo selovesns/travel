@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>세부 가족여행 일정표</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #0284c7;
+            --secondary-color: #38bdf8;
+            --accent-color: #ffa41b;
+            --light-bg: #f0f9ff;
+            --dark-text: #0f172a;
+            --light-text: #f8fafc;
+            --border-radius: 12px;
+            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+            color: var(--dark-text);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--light-text);
+            padding: 30px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path fill="rgba(255,255,255,0.1)" d="M0,0 L100,0 L100,100 L0,100 Z M50,50 m-40,0 a40,40 0 1,0 80,0 a40,40 0 1,0 -80,0"></path></svg>');
+            opacity: 0.2;
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+            font-weight: 300;
+            position: relative;
+            z-index: 1;
+        }
+
+        .tabs {
+            display: flex;
+            background-color: var(--primary-color);
+            padding: 0 10px;
+        }
+
+        .tab {
+            padding: 15px 20px;
+            cursor: pointer;
+            color: var(--light-text);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab.active {
+            background-color: #fff;
+            color: var(--primary-color);
+            border-radius: 10px 10px 0 0;
+        }
+
+        .tab-icon {
+            font-size: 1.2rem;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .schedule-day {
+            margin-bottom: 40px;
+        }
+
+        .day-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .day-icon {
+            background-color: var(--primary-color);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-right: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .day-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 20px;
+        }
+
+        .schedule-table th {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .schedule-table th:first-child {
+            border-top-left-radius: var(--border-radius);
+        }
+
+        .schedule-table th:last-child {
+            border-top-right-radius: var(--border-radius);
+        }
+
+        .schedule-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            background-color: white;
+        }
+
+        .schedule-table tr:last-child td:first-child {
+            border-bottom-left-radius: var(--border-radius);
+        }
+
+        .schedule-table tr:last-child td:last-child {
+            border-bottom-right-radius: var(--border-radius);
+        }
+
+        .time-cell {
+            width: 20%;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .activity-cell {
+            position: relative;
+        }
+
+        .activity {
+            display: flex;
+            align-items: center;
+        }
+
+        .activity-icon {
+            margin-right: 10px;
+            color: var(--accent-color);
+            font-size: 1.2rem;
+        }
+
+        .location {
+            color: #64748b;
+            margin-top: 5px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .location::before {
+            content: "📍";
+            margin-right: 5px;
+        }
+
+        .highlight {
+            background-color: rgba(255, 164, 27, 0.1);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                border-radius: 0;
+            }
+            
+            header {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .tab {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .day-title {
+                font-size: 1.5rem;
+            }
+            
+            .tab-content {
+                padding: 15px;
+            }
+            
+            .schedule-table th,
+            .schedule-table td {
+                padding: 10px;
+            }
+            
+            .time-cell {
+                width: 30%;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab {
+                padding: 8px 10px;
+                font-size: 0.85rem;
+            }
+
+            h1 {
+                font-size: 1.6rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .day-title {
+                font-size: 1.3rem;
+            }
+
+            .day-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+
+            .schedule-table th, 
+            .schedule-table td {
+                padding: 8px;
+            }
+
+            .time-cell {
+                width: 35%;
+                font-size: 0.9rem;
+            }
+
+            .activity span {
+                font-size: 0.9rem;
+            }
+
+            .location {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 375px) {
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            .tab {
+                padding: 6px 8px;
+                font-size: 0.8rem;
+            }
+
+            .tab-icon {
+                font-size: 1rem;
+            }
+
+            .day-title {
+                font-size: 1.2rem;
+            }
+
+            .tab-content {
+                padding: 10px;
+            }
+
+            .schedule-table th, 
+            .schedule-table td {
+                padding: 6px;
+            }
+
+            .time-cell {
+                width: 38%;
+                font-size: 0.85rem;
+            }
+
+            .activity span {
+                font-size: 0.85rem;
+            }
+
+            .activity-icon {
+                margin-right: 5px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.3rem;
+            }
+
+            .subtitle {
+                font-size: 0.85rem;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+                padding: 5px;
+            }
+
+            .tab {
+                flex: 1 0 48%;
+                padding: 5px;
+                font-size: 0.75rem;
+                text-align: center;
+                justify-content: center;
+                margin: 2px;
+                border-radius: 5px;
+            }
+
+            .tab.active {
+                border-radius: 5px;
+            }
+
+            .day-header {
+                margin-bottom: 10px;
+            }
+
+            .day-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+                margin-right: 8px;
+            }
+
+            .day-title {
+                font-size: 1.1rem;
+            }
+
+            .schedule-table th {
+                font-size: 0.85rem;
+                padding: 5px;
+            }
+
+            .schedule-table td {
+                padding: 5px;
+            }
+
+            .time-cell {
+                width: 40%;
+                font-size: 0.8rem;
+            }
+
+            .activity span {
+                font-size: 0.8rem;
+                line-height: 1.3;
+            }
+
+            .location {
+                font-size: 0.7rem;
+            }
+
+            .activity-icon {
+                margin-right: 4px;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏝️ 세부 가족여행 일정표</h1>
+            <p class="subtitle">라온스퀘어 → 누스타 리조트</p>
+        </header>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="day1">
+                <span class="tab-icon">✈️</span> 21일 (도착일)
+            </div>
+            <div class="tab" data-tab="day2">
+                <span class="tab-icon">🏊</span> 22일 (리조트)
+            </div>
+            <div class="tab" data-tab="day3">
+                <span class="tab-icon">🚣</span> 23일 (호핑투어)
+            </div>
+            <div class="tab" data-tab="day4">
+                <span class="tab-icon">🧳</span> 24일 (체크아웃)
+            </div>
+            <div class="tab" data-tab="day5">
+                <span class="tab-icon">✈️</span> 25일 (귀국)
+            </div>
+        </div>
+
+        <div class="tab-content active" id="day1">
+            <div class="schedule-day">
+                <div class="day-header">
+                    <div class="day-icon">1</div>
+                    <div class="day-title">21일 (도착일)</div>
+                </div>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>시간</th>
+                            <th>일정</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="time-cell">01:40</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🛬</span>
+                                    <span>세부공항 도착 → 수화물 수령 및 출국 수속 (30분)</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">02:10</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🚕</span>
+                                    <span>라온스퀘어 이동 (약 30분)</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">02:40</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🏨</span>
+                                    <span>라온스퀘어 도착 및 체크인</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">03:00~09:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">😴</span>
+                                    <span>숙면 (시차적응 및 피로회복)</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">09:00~10:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">⏰</span>
+                                    <span>기상</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">11:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🍳</span>
+                                    <span>조식</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">12:00~14:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">☕</span>
+                                    <span>호텔 내부 휴식 or 커피</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">14:00~15:30</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🚗</span>
+                                    <span>누스타 리조트로 이동 및 체크인</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">15:30~17:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🏖️</span>
+                                    <span>리조트 내 휴식</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">17:00~17:30</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🚕</span>
+                                    <span>주변 산책</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="highlight">
+                            <td class="time-cell">18:00~19:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🍽️</span>
+                                    <span>호텔 근처 저녁식사</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">19:00~20:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🚶</span>
+                                    <span>주변 산책 → 숙소 복귀</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">20:00~</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🌙</span>
+                                    <span>자유시간 및 취침</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="day2">
+            <div class="schedule-day">
+                <div class="day-header">
+                    <div class="day-icon">2</div>
+                    <div class="day-title">22일 (리조트 + 오션파크)</div>
+                </div>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>시간</th>
+                            <th>일정</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="time-cell">08:00~09:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">⏰</span>
+                                    <span>기상 및 조식</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">09:30~12:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🏊</span>
+                                    <span>리조트 수영장 & 쇼핑몰 산책</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="highlight">
+                            <td class="time-cell">12:00~13:30</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🍽️</span>
+                                    <span>점심 @피나(FINA, 필리핀 음식)</span>
+                                </div>
+                                <div class="location">FINA 레스토랑</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">13:30~15:30</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🐠</span>
+                                    <span>세부 오션파크 방문 (실내 아쿠아리움)</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="highlight">
+                            <td class="time-cell">17:30~19:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🦀</span>
+                                    <span>저녁식사 @칠리크랩</span>
+                                </div>
+                                <div class="location">칠리크랩 레스토랑</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">19:30~</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🌙</span>
+                                    <span>자유시간 및 휴식</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="day3">
+            <div class="schedule-day">
+                <div class="day-header">
+                    <div class="day-icon">3</div>
+                    <div class="day-title">23일 (호핑투어)</div>
+                </div>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>시간</th>
+                            <th>일정</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="time-cell">07:30~08:30</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">⏰</span>
+                                    <span>기상 및 조식</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="highlight">
+                            <td class="time-cell">09:00~16:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🚣</span>
+                                    <span>막탄 호핑투어 (날루수안 & 힐루뚱안 섬, 점심 포함)</span>
+                                </div>
+                                <div class="location">날루수안 & 힐루뚱안 섬</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">16:30~18:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🏨</span>
+                                    <span>리조트 복귀 및 정리</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="highlight">
+                            <td class="time-cell">18:30~20:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🍽️</span>
+                                    <span>저녁 @SM 씨사이드몰 골드망고 그릴</span>
+                                </div>
+                                <div class="location">SM 씨사이드몰 골드망고 그릴</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">20:30~</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🌙</span>
+                                    <span>자유시간 및 취침</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="day4">
+            <div class="schedule-day">
+                <div class="day-header">
+                    <div class="day-icon">4</div>
+                    <div class="day-title">24일 (체크아웃 + 굿바이 패키지)</div>
+                </div>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>시간</th>
+                            <th>일정</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="time-cell">08:00~09:30</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">⏰</span>
+                                    <span>기상 및 조식</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">10:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">📤</span>
+                                    <span>체크아웃 (짐 보관 & 굿바이 패키지 이용)</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">10:00~13:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🛍️</span>
+                                    <span>리조트/NUSTAR 몰 자유 시간</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">13:00~14:30</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🍽️</span>
+                                    <span>점심 (리조트 내 or 몰 내 레스토랑)</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">14:30~16:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">👶</span>
+                                    <span>키즈존 or 실내 휴식 (낮잠 포함)</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">16:00~18:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🔭</span>
+                                    <span>탑스 전망대 방문 or 리조트 내 여유 시간</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="highlight">
+                            <td class="time-cell">18:30~20:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🍽️</span>
+                                    <span>굿바이 저녁식사 (하우스 오브 레촌 or 내부 식당)</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">20:00~22:30</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🚿</span>
+                                    <span>샤워 및 짐 정리 (샤워룸 이용)</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">22:30~23:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🚕</span>
+                                    <span>공항 이동</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">23:00~00:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🧳</span>
+                                    <span>공항 수속 준비</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="day5">
+            <div class="schedule-day">
+                <div class="day-header">
+                    <div class="day-icon">5</div>
+                    <div class="day-title">25일 (귀국)</div>
+                </div>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th>시간</th>
+                            <th>일정</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="time-cell">00:00~02:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">🛂</span>
+                                    <span>체크인 및 출국 수속</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="time-cell">02:00</td>
+                            <td class="activity-cell">
+                                <div class="activity">
+                                    <span class="activity-icon">✈️</span>
+                                    <span>비행기 탑승 ✈️ 귀국</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer>
+            <p>여행 일정은 현지 상황에 따라 변경될 수 있습니다.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    tab.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html> 
